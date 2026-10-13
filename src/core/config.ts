@@ -142,6 +142,9 @@ export const ZOOM_MAX = 1.25;
 /** Vertical anchor of the camera, as a fraction of viewport height. */
 export const CAMERA_ANCHOR_Y = 0.62;
 
+/** Repository linked from the GitHub icon in the top-right corner. */
+export const REPO_URL = 'https://github.com/coffeemil/Redline-1612N';
+
 // ---------------------------------------------------------------------------
 // Object budgets
 //

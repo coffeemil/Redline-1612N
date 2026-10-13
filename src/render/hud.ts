@@ -19,6 +19,13 @@ export interface ButtonRect {
   h: number;
 }
 
+/** Screen-space rectangle of the GitHub icon, refreshed by {@link layoutHud}. */
+export interface LinkRect {
+  x: number;
+  y: number;
+  size: number;
+}
+
 /** Build a font string scaled to the current viewport. */
 export function uiFont(viewport: Viewport, weight: number, size: number): string {
   const px = Math.max(9, Math.round(size * viewport.scale));
@@ -26,17 +33,22 @@ export function uiFont(viewport: Viewport, weight: number, size: number): string
 }
 
 /**
- * Position the restart button for the current viewport.
+ * Position the restart button and the GitHub icon for the current viewport.
  *
- * The button only appears on the game-over overlay, so it is centred
- * horizontally and sits just below the overlay's text block.
+ * The restart button only appears on the game-over overlay, so it is centred
+ * horizontally and sits just below the overlay's text block. The GitHub icon
+ * lives in the top-right corner, clear of the safe area.
  */
-export function layoutHud(viewport: Viewport, button: ButtonRect): void {
+export function layoutHud(viewport: Viewport, button: ButtonRect, link: LinkRect): void {
   const S = viewport.scale;
   button.w = 132 * S;
   button.h = 46 * S;
   button.x = (viewport.width - button.w) / 2;
   button.y = viewport.height / 2 + 150 * S;
+
+  link.size = 34 * S;
+  link.x = viewport.width - link.size - (16 * S + viewport.safe.right);
+  link.y = 16 * S + viewport.safe.top;
 }
 
 /** Hit-test the restart button, with a generous touch padding. */
@@ -47,6 +59,17 @@ export function hitRestart(viewport: Viewport, button: ButtonRect, x: number, y:
     x <= button.x + button.w + pad &&
     y >= button.y - pad &&
     y <= button.y + button.h + pad
+  );
+}
+
+/** Hit-test the GitHub icon, with a generous touch padding. */
+export function hitLink(viewport: Viewport, link: LinkRect, x: number, y: number): boolean {
+  const pad = 10 * viewport.scale;
+  return (
+    x >= link.x - pad &&
+    x <= link.x + link.size + pad &&
+    y >= link.y - pad &&
+    y <= link.y + link.size + pad
   );
 }
 
@@ -62,12 +85,13 @@ export interface HudOptions {
   readonly viewport: Viewport;
   readonly physics: Physics;
   readonly button: ButtonRect;
+  readonly link: LinkRect;
   readonly hintAlpha: number;
 }
 
 /** Draw the in-run HUD: distance, best, speed, brake gauge and hints. */
 export function drawHud(ctx: CanvasRenderingContext2D, opts: HudOptions): void {
-  const { viewport, physics, button, hintAlpha } = opts;
+  const { viewport, physics, button, link, hintAlpha } = opts;
   const { width: W, height: H, scale: S, safe } = viewport;
   const car = physics.car;
 
@@ -131,7 +155,58 @@ export function drawHud(ctx: CanvasRenderingContext2D, opts: HudOptions): void {
   if (physics.state === 'over') {
     drawRestartButton(ctx, viewport, button);
   }
+
+  drawGithubIcon(ctx, viewport, link);
 }
+
+/**
+ * Draw the GitHub icon in the top-right corner.
+ *
+ * The mark is the official Octocat silhouette, traced as a path so the game
+ * keeps its zero-asset promise.
+ */
+export function drawGithubIcon(
+  ctx: CanvasRenderingContext2D,
+  viewport: Viewport,
+  link: LinkRect,
+): void {
+  const r = link.size / 2;
+  const cx = link.x + r;
+  const cy = link.y + r;
+
+  ctx.setTransform(viewport.dpr, 0, 0, viewport.dpr, 0, 0);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.10)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // The Octocat path is authored in a 16x16 box; scale it into the circle.
+  const scale = (link.size * 0.62) / 16;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.translate(-8, -8);
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.fill(GITHUB_PATH);
+  ctx.restore();
+}
+
+/** The GitHub mark, in a 16x16 coordinate box. */
+const GITHUB_PATH = new Path2D(
+  'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 ' +
+    '0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 ' +
+    '1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 ' +
+    '0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 ' +
+    '2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 ' +
+    '0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z',
+);
 
 /**
  * Draw the restart button on its own.

@@ -7,6 +7,7 @@ import {
   BRAKE_THRESHOLD,
   FIXED_DT,
   MAX_FRAME_DT,
+  REPO_URL,
   V_MAX,
 } from '../core/config.js';
 import { Effects } from '../core/effects.js';
@@ -21,9 +22,11 @@ import {
   drawGameOver,
   drawHud,
   drawRestartButton,
+  hitLink,
   hitRestart,
   layoutHud,
   type ButtonRect,
+  type LinkRect,
 } from '../render/hud.js';
 import { drawRoad } from '../render/road.js';
 import { InputManager } from './input.js';
@@ -45,6 +48,7 @@ export class Game {
   private readonly audio = new AudioEngine();
   private readonly input: InputManager;
   private readonly button: ButtonRect = { x: 0, y: 0, w: 0, h: 0 };
+  private readonly link: LinkRect = { x: 0, y: 0, size: 0 };
 
   private brakeHeld = false;
   private hintAlpha = 1;
@@ -74,7 +78,7 @@ export class Game {
   start(): void {
     this.physics.best = loadBest();
     this.viewport.resize();
-    layoutHud(this.viewport, this.button);
+    layoutHud(this.viewport, this.button, this.link);
     this.reset();
 
     this.input.attach();
@@ -116,9 +120,14 @@ export class Game {
     this.audio.init();
     this.audio.resume();
 
-    // Keyboard presses arrive as (-1, -1) and never hit the button.
-    // The button is only visible on the game-over overlay, so it is only
-    // interactive there too.
+    // Keyboard presses arrive as (-1, -1) and never hit the on-screen targets.
+    if (x >= 0 && y >= 0 && hitLink(this.viewport, this.link, x, y)) {
+      window.open(REPO_URL, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // The restart button is only visible on the game-over overlay, so it is
+    // only interactive there too.
     if (
       this.physics.state === 'over' &&
       x >= 0 &&
@@ -147,14 +156,14 @@ export class Game {
     clearTimeout(this.resizeTimer);
     this.resizeTimer = window.setTimeout(() => {
       this.viewport.resize();
-      layoutHud(this.viewport, this.button);
+      layoutHud(this.viewport, this.button, this.link);
     }, 100);
   };
 
   private readonly onOrientation = (): void => {
     window.setTimeout(() => {
       this.viewport.resize();
-      layoutHud(this.viewport, this.button);
+      layoutHud(this.viewport, this.button, this.link);
     }, 220);
   };
 
@@ -259,6 +268,7 @@ export class Game {
       viewport: this.viewport,
       physics: this.physics,
       button: this.button,
+      link: this.link,
       hintAlpha: this.hintAlpha,
     });
 
