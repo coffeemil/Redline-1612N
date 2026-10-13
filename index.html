@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#0a0b0f">
+<meta name="description" content="Redline1612N — 一款关于「刹车踩到刚好」的无限赛车游戏。">
+<title>Redline1612N</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0b0f'/%3E%3Crect x='6' y='11' width='20' height='10' rx='3' fill='%23e0342f'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+  }
+  *{ -webkit-tap-highlight-color: transparent; }
+  html,body{
+    margin:0;padding:0;width:100%;height:100%;
+    background:#0a0b0f;overflow:hidden;
+    position:fixed;inset:0;
+    overscroll-behavior:none;
+    -webkit-user-select:none;-moz-user-select:none;user-select:none;
+    -webkit-touch-callout:none;
+    touch-action:none;
+  }
+  canvas{
+    display:block;width:100%;height:100%;
+    touch-action:none;
+    -webkit-user-select:none;user-select:none;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

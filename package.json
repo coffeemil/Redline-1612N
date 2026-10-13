@@ -1,0 +1,40 @@
+{
+  "name": "redline-1612n",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A one-thumb endless racing game about braking exactly hard enough — and not one newton more.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "game",
+    "canvas",
+    "typescript",
+    "vite",
+    "endless-runner",
+    "mobile"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "check": "npm run lint && npm run typecheck && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.16.0",
+    "vite": "^6.0.3"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "esbuild@0.21.5": true
+  }
+}
